@@ -4,7 +4,7 @@ UseRandomlyGeneratedImages=1
 RandomlyGeneratedImageWidth=3000
 RandomlyGeneratedImageHeight=3000
 NumberOfChannels=1
-NumberOfThreads=20
+NumberOfThreads=4
 
 # List of algorithms
 #
@@ -37,8 +37,8 @@ AlphaTreeAlgorithm=HybridParallel
 
 BitDepth=64
 UseTreeSizeEstimation=1
-Connectivity=4
-NumberOfTestIterations=10
+Connectivity=8
+NumberOfTestIterations=5
 ParameterInteger1=3
 ParameterInteger2=2
 ParameterInteger3=3

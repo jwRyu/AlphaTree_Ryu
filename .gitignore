@@ -3,8 +3,6 @@ obj/*
 *.png
 *.out
 AlphaTree
-config.txt
-gmon.out
 obj/AlphaTree.o
 obj/HybridQueue.o
 obj/main.o
@@ -23,6 +21,5 @@ obj/Trie.o
 obj/walltime.o
 AlphaTree
 analysis.txt
-config.txt
 gmon.out
 AlphaTree

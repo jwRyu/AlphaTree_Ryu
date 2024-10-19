@@ -2,7 +2,7 @@
 #ifndef ALPHATREECONFIG_H
 #define ALPHATREECONFIG_H
 
-#define CONFIGFILENAME "/home/jiwoo/AlphaTreeAlgorithms/config.txt"
+// #define CONFIGFILENAME "/home/jiwoo/AlphaTreeAlgorithms/config.txt"
 
 #include <defines.hpp>
 
@@ -49,6 +49,6 @@ class AlphaTreeConfig {
     double getDouble(const std::string &key) const;
 };
 
-inline AlphaTreeConfig alphatreeConfig(CONFIGFILENAME);
+// inline AlphaTreeConfig alphatreeConfig(CONFIGFILENAME);
 
 #endif // CONFIGREADER_H

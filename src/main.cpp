@@ -9,6 +9,8 @@
 int main(int argc, char **argv) {
     // srand(time(NULL));
 
+    const auto configFileName = argc < 2 ? "config.txt" : std::string(argv[1]);
+    AlphaTreeConfig alphatreeConfig(configFileName);
     auto config = alphatreeConfig.load(argc, argv);
 
     if (config.has_value() == false) {
@@ -23,10 +25,15 @@ int main(int argc, char **argv) {
     // auto [image, w, h, ch] = PNGCodec::imread("img03.png");
     // PNGCodec::imwrite(image, w, h, ch, "out.png");
 
-    const auto &width = params.randomGenImageWidth;
-    const auto &height = params.randomGenImageHeight;
-    const auto &bitdepth = params.bitdepth;
-    const auto &nch = params.nchannels;
+    // auto input_filename =
+    //     "/home/jiwoo/2024/TIP/dataset/S2A_MSIL2A_20241006T104921_N0511_R051_T31UES_20241006T151849-ql.png";
+    // auto output_filename = "/home/jiwoo/2024/TIP/dataset/out.png";
+    auto [image, w, h, ch] = PNGCodec::imread(params.imageFileName);
+
+    const auto &width = params.UseRandomlyGeneratedImages ? params.randomGenImageWidth : w;
+    const auto &height = params.UseRandomlyGeneratedImages ? params.randomGenImageHeight : h;
+    const auto &bitdepth = params.UseRandomlyGeneratedImages ? params.bitdepth : 16 * ch;
+    const auto &nch = params.UseRandomlyGeneratedImages ? params.nchannels : ch;
     const auto &dMetric = params.dissimilarityMetric;
     const auto &conn = params.connectivity;
     const auto &algCode = params.alphaTreeAlgorithmCode;
@@ -95,6 +102,14 @@ int main(int argc, char **argv) {
             }
 
         } else {
+
+            AlphaTree<uint16_t> tree;
+            tStart = get_wall_time();
+            tree.BuildAlphaTree(image.data(), height, width, nch, dMetric, conn, algCode, nthr, tse, fparam1, fparam2,
+                                iparam1);
+            tEnd = get_wall_time();
+
+            // PNGCodec::imwrite(image, w, h, ch, output_filename);
         }
 
         auto runtime = tEnd - tStart;
