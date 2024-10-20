@@ -4,7 +4,7 @@ UseRandomlyGeneratedImages=1
 RandomlyGeneratedImageWidth=5000
 RandomlyGeneratedImageHeight=5000
 NumberOfChannels=1
-NumberOfThreads=1
+NumberOfThreads=16
 
 # List of algorithms
 #

@@ -1,2 +1,5 @@
-./AlphaTree dont.care test 1 5000 5000 1 1 FloodHierHeapQueue 64 1 8 5 4 2 3 45.0 0.15 0.3
-./AlphaTree dont.care test 1 5000 5000 1 1 FloodHeapQueue 64 1 8 5 8 2 3 45.0 0.15 0.3
+./AlphaTree config.txt /home/jiwoo/2024/TIP/dataset/S2A_MSIL2A_20241006T104921_N0511_R051_T31UES_20241006T151849-ql.png
+./AlphaTree config.txt /home/jiwoo/2024/TIP/dataset/S2A_MSIL2A_20241006T104921_N0511_R051_T31UFS_20241006T151849.png
+./AlphaTree config.txt /home/jiwoo/2024/TIP/dataset/S2B_MSIL2A_20241011T104859_N0511_R051_T31UFT_20241011T133022.png
+./AlphaTree config.txt /home/jiwoo/2024/TIP/dataset/S2B_MSIL2A_20241011T104859_N0511_R051_T31UFU_20241011T133022.png
+./AlphaTree config.txt /home/jiwoo/2024/TIP/dataset/S2B_MSIL2A_20241011T104859_N0511_R051_T31UFV_20241011T133022.png

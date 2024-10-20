@@ -9,6 +9,8 @@
 int main(int argc, char **argv) {
     // srand(time(NULL));
 
+    const auto configFileName = argc < 2 ? "config.txt" : std::string(argv[1]);
+    alphatreeConfig.initialize(configFileName);
     auto config = alphatreeConfig.load(argc, argv);
 
     if (config.has_value() == false) {
@@ -18,15 +20,12 @@ int main(int argc, char **argv) {
 
     AlphaTreeConfig::AlphaTreeParameters params = config.value();
 
-    // auto input_filename = "img03.png";
-    // auto output_filename = "out.png";
-    // auto [image, w, h, ch] = PNGCodec::imread("img03.png");
-    // PNGCodec::imwrite(image, w, h, ch, "out.png");
+    auto [image, w, h, ch] = PNGCodec::imread(params.UseRandomlyGeneratedImages ? "RAND" : params.imageFileName);
 
-    const auto &width = params.randomGenImageWidth;
-    const auto &height = params.randomGenImageHeight;
-    const auto &bitdepth = params.bitdepth;
-    const auto &nch = params.nchannels;
+    const auto &width = params.UseRandomlyGeneratedImages ? params.randomGenImageWidth : w;
+    const auto &height = params.UseRandomlyGeneratedImages ? params.randomGenImageHeight : h;
+    const auto &bitdepth = params.UseRandomlyGeneratedImages ? params.bitdepth : 16 * ch;
+    const auto &nch = params.UseRandomlyGeneratedImages ? params.nchannels : ch;
     const auto &dMetric = params.dissimilarityMetric;
     const auto &conn = params.connectivity;
     const auto &algCode = params.alphaTreeAlgorithmCode;
@@ -40,10 +39,12 @@ int main(int argc, char **argv) {
     const auto &fparam2 = params.fparam2;
     // const auto &fparam3 = params.fparam3;
 
-    printf("====================================================================================\n");
-    printf("========== image [%d/%d]: imgsize = %d x %d (%d bits, %d channels) ================\n", 0, 0, (int)height,
-           (int)width, (int)bitdepth, (int)nch);
-    printf("====================================================================================\n");
+    if (!params.UseRandomlyGeneratedImages)
+        printf("Image file name: %s\n", params.imageFileName.c_str());
+    printf("=======================================================================\n");
+    printf("========== imgsize = %d x %d (%d bits, %d ch, %dN) ================\n", (int)height, (int)width,
+           (int)bitdepth, (int)nch, params.connectivity);
+    printf("=======================================================================\n");
     printf("-----------------------------------------------------------------------------------\n");
     printf("%d Running %s (%d threads)\n", (int)algCode, alphatreeConfig.getAlphaTreeAlgorithmName(algCode).c_str(),
            (int)nthr);
@@ -95,6 +96,11 @@ int main(int argc, char **argv) {
             }
 
         } else {
+            AlphaTree<uint16_t> tree;
+            tStart = get_wall_time();
+            tree.BuildAlphaTree(image.data(), height, width, nch, dMetric, conn, algCode, nthr, tse, fparam1, fparam2,
+                                iparam1);
+            tEnd = get_wall_time();
         }
 
         auto runtime = tEnd - tStart;

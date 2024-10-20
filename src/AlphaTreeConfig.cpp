@@ -1,7 +1,9 @@
 #include <AlphaTreeConfig.hpp>
 
-AlphaTreeConfig::AlphaTreeConfig(const std::string &filename, const std::string &commentToken)
-    : filename(filename), commentToken(commentToken) {
+void AlphaTreeConfig::initialize(const std::string &filename_, const std::string &commentToken_) {
+    filename = filename_;
+    commentToken = commentToken_;
+
     AlgorithmNameToCode.clear();
     AlgorithmCodeToName.clear();
 
@@ -36,7 +38,7 @@ std::string AlphaTreeConfig::getAlphaTreeAlgorithmName(int AlphaTreeAlgorithmCod
 }
 
 std::optional<AlphaTreeConfig::AlphaTreeParameters> AlphaTreeConfig::load(int argc, char **argv) {
-    if (argc == 1) {
+    {
         std::ifstream configFile(filename);
         if (!configFile.is_open()) {
             return std::nullopt;
@@ -61,33 +63,10 @@ std::optional<AlphaTreeConfig::AlphaTreeParameters> AlphaTreeConfig::load(int ar
             }
         }
         configFile.close();
-        // }
-        // else if (argc == 19) {
-        // config["ImageFileName"] = std::string(argv[1]);
-        // config["LogFileName"] = std::string(argv[2]);
-        // config["UseRandomlyGeneratedImages"] = std::string(argv[3]);
-        // config["RandomlyGeneratedImageWidth"] = std::string(argv[4]);
-        // config["RandomlyGeneratedImageHeight"] = std::string(argv[5]);
-        // config["NumberOfChannels"] = std::string(argv[6]);
-        // config["NumberOfThreads"] = std::string(argv[7]);
-        // config["AlphaTreeAlgorithm"] = std::string(argv[8]);
-        // config["BitDepth"] = std::string(argv[9]);
-        // config["UseTreeSizeEstimation"] = std::string(argv[10]);
-        // config["Connectivity"] = std::string(argv[11]);
-        // config["NumberOfTestIterations"] = std::string(argv[12]);
-        // config["ParameterInteger1"] = std::string(argv[13]);
-        // config["ParameterInteger2"] = std::string(argv[14]);
-        // config["ParameterInteger3"] = std::string(argv[15]);
-        // config["ParameterFloat1"] = std::string(argv[16]);
-        // config["ParameterFloat2"] = std::string(argv[17]);
-        // config["ParameterFloat3"] = std::string(argv[18]);
-    } else {
-        std::cerr << "[AlphaTreeConfig::load] Invalid argument (requires either 0 or 18)" << std::endl;
-        return std::nullopt;
     }
 
     AlphaTreeConfig::AlphaTreeParameters params;
-    params.imageFileName = getString("ImageFileName");
+    params.imageFileName = argc < 3 ? getString("ImageFileName") : std::string(argv[2]);
     params.logFileName = getString("LogFileName");
     params.nchannels = getInteger("NumberOfChannels");
     params.numthreads = getInteger("NumberOfThreads");
