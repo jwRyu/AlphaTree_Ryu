@@ -10,7 +10,7 @@ int main(int argc, char **argv) {
     // srand(time(NULL));
 
     const auto configFileName = argc < 2 ? "config.txt" : std::string(argv[1]);
-    AlphaTreeConfig alphatreeConfig(configFileName);
+    alphatreeConfig.initialize(configFileName);
     auto config = alphatreeConfig.load(argc, argv);
 
     if (config.has_value() == false) {
@@ -20,15 +20,7 @@ int main(int argc, char **argv) {
 
     AlphaTreeConfig::AlphaTreeParameters params = config.value();
 
-    // auto input_filename = "img03.png";
-    // auto output_filename = "out.png";
-    // auto [image, w, h, ch] = PNGCodec::imread("img03.png");
-    // PNGCodec::imwrite(image, w, h, ch, "out.png");
-
-    // auto input_filename =
-    //     "/home/jiwoo/2024/TIP/dataset/S2A_MSIL2A_20241006T104921_N0511_R051_T31UES_20241006T151849-ql.png";
-    // auto output_filename = "/home/jiwoo/2024/TIP/dataset/out.png";
-    auto [image, w, h, ch] = PNGCodec::imread(params.imageFileName);
+    auto [image, w, h, ch] = PNGCodec::imread(params.UseRandomlyGeneratedImages ? "RAND" : params.imageFileName);
 
     const auto &width = params.UseRandomlyGeneratedImages ? params.randomGenImageWidth : w;
     const auto &height = params.UseRandomlyGeneratedImages ? params.randomGenImageHeight : h;
@@ -47,10 +39,12 @@ int main(int argc, char **argv) {
     const auto &fparam2 = params.fparam2;
     // const auto &fparam3 = params.fparam3;
 
-    printf("====================================================================================\n");
-    printf("========== image [%d/%d]: imgsize = %d x %d (%d bits, %d channels) ================\n", 0, 0, (int)height,
-           (int)width, (int)bitdepth, (int)nch);
-    printf("====================================================================================\n");
+    if (!params.UseRandomlyGeneratedImages)
+        printf("Image file name: %s\n", params.imageFileName.c_str());
+    printf("=======================================================================\n");
+    printf("========== imgsize = %d x %d (%d bits, %d ch, %dN) ================\n", (int)height, (int)width,
+           (int)bitdepth, (int)nch, params.connectivity);
+    printf("=======================================================================\n");
     printf("-----------------------------------------------------------------------------------\n");
     printf("%d Running %s (%d threads)\n", (int)algCode, alphatreeConfig.getAlphaTreeAlgorithmName(algCode).c_str(),
            (int)nthr);
@@ -102,14 +96,11 @@ int main(int argc, char **argv) {
             }
 
         } else {
-
             AlphaTree<uint16_t> tree;
             tStart = get_wall_time();
             tree.BuildAlphaTree(image.data(), height, width, nch, dMetric, conn, algCode, nthr, tse, fparam1, fparam2,
                                 iparam1);
             tEnd = get_wall_time();
-
-            // PNGCodec::imwrite(image, w, h, ch, output_filename);
         }
 
         auto runtime = tEnd - tStart;

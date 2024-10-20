@@ -29,7 +29,7 @@ class AlphaTreeConfig {
         double fparam2;
         double fparam3;
     };
-    AlphaTreeConfig(const std::string &filename, const std::string &commentToken = "#");
+    void initialize(const std::string &filename, const std::string &commentToken = "#");
     std::optional<AlphaTreeParameters> load(int argc, char **argv);
 
     int getAlphaTreeAlgorithmCode(std::string AlphaTreeAlgorithmName);
@@ -49,6 +49,6 @@ class AlphaTreeConfig {
     double getDouble(const std::string &key) const;
 };
 
-// inline AlphaTreeConfig alphatreeConfig(CONFIGFILENAME);
+inline AlphaTreeConfig alphatreeConfig;
 
 #endif // CONFIGREADER_H
