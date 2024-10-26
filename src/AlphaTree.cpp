@@ -2467,7 +2467,7 @@ template <class Pixel> void AlphaTree<Pixel>::FloodHierarHeapQueue(const Pixel *
     ImgIdx startingPixel = 0;
     runFloodHHPQ(startingPixel, img, a, r, listsize, imgSize, nredges, dimgSize, numLevels, dhist, dimg, isAvailable);
 
-    const bool sortNodePostConstruction = true;
+    const bool sortNodePostConstruction = false;
     if (sortNodePostConstruction)
         sortAlphaNodes();
 

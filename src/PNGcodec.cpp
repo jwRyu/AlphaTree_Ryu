@@ -51,6 +51,8 @@ std::vector<uint16_t> PNGCodec::toImage(const cv::Mat &imageCV) {
 }
 
 std::tuple<std::vector<uint16_t>, int, int, int> PNGCodec::imread(const std::string &filename) {
+    if (filename == "RAND")
+        return {{}, -1, -1, -1};
 
     // // Read the image file
     cv::Mat imageCV = cv::imread(filename, cv::IMREAD_UNCHANGED);

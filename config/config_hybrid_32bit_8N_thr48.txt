@@ -1,10 +1,10 @@
-ImageFileName=/home/jiwoo/2024/TIP/dataset/001_S2A_MSIL2A_20241006T104921_N0511_R051_T31UES_20241006T151849-ql.png
+ImageFileName=image03.png
 LogFileName=test
 UseRandomlyGeneratedImages=1
-RandomlyGeneratedImageWidth=3000
-RandomlyGeneratedImageHeight=3000
+RandomlyGeneratedImageWidth=10000
+RandomlyGeneratedImageHeight=10000
 NumberOfChannels=1
-NumberOfThreads=1
+NumberOfThreads=48
 
 # List of algorithms
 #
@@ -33,11 +33,11 @@ NumberOfThreads=1
 # 16. FloodHierHeapQueueNoCache
 # 17. FloodHeapQueueNaiveNoCache
 # 18. FloodHierHeapQueuePar
-AlphaTreeAlgorithm=FloodHierHeapQueue
+AlphaTreeAlgorithm=HybridParallel
 
-BitDepth=64
+BitDepth=32
 UseTreeSizeEstimation=1
-Connectivity=4
+Connectivity=8
 NumberOfTestIterations=5
 ParameterInteger1=3
 ParameterInteger2=2
