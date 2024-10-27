@@ -45,6 +45,28 @@ std::vector<uint16_t> PNGCodec::toImage(const cv::Mat &imageCV) {
         std::copy(g.begin<uint16_t>(), g.end<uint16_t>(), image.begin() + imageCV.cols * imageCV.rows);
         std::copy(b.begin<uint16_t>(), b.end<uint16_t>(), image.begin() + imageCV.cols * imageCV.rows * 2);
         return image;
+    } else if (imageCV.type() == CV_8U) {
+        std::vector<uint8_t> image8(imageCV.cols * imageCV.rows);
+        std::copy(imageCV.begin<uint8_t>(), imageCV.end<uint8_t>(), image8.begin());
+        std::vector<uint16_t> image(imageCV.cols * imageCV.rows);
+        for (size_t i = 0; i < image.size(); i++)
+            image[i] = image8[i];
+        return image;
+    } else if (imageCV.type() == CV_8UC3) {
+        cv::Mat b, g, r;
+
+        cv::extractChannel(imageCV, b, 0);
+        cv::extractChannel(imageCV, g, 1);
+        cv::extractChannel(imageCV, r, 2);
+
+        std::vector<uint8_t> image8(imageCV.cols * imageCV.rows * imageCV.channels());
+        std::copy(r.begin<uint8_t>(), r.end<uint8_t>(), image8.begin());
+        std::copy(g.begin<uint8_t>(), g.end<uint8_t>(), image8.begin() + imageCV.cols * imageCV.rows);
+        std::copy(b.begin<uint8_t>(), b.end<uint8_t>(), image8.begin() + imageCV.cols * imageCV.rows * 2);
+        std::vector<uint16_t> image(imageCV.cols * imageCV.rows);
+        for (size_t i = 0; i < image.size(); i++)
+            image[i] = image8[i];
+        return image;
     }
 
     return {};

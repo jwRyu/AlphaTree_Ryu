@@ -22,6 +22,13 @@ int main(int argc, char **argv) {
 
     auto [image, w, h, ch] = PNGCodec::imread(params.UseRandomlyGeneratedImages ? "RAND" : params.imageFileName);
 
+    {
+        auto img1(image);
+        for (auto &pix : img1)
+            pix = std::min(65535, (int)pix * 10);
+        PNGCodec::imwrite(img1, w, h, ch, "out.png");
+    }
+
     const auto &width = params.UseRandomlyGeneratedImages ? params.randomGenImageWidth : w;
     const auto &height = params.UseRandomlyGeneratedImages ? params.randomGenImageHeight : h;
     const auto &bitdepth = params.UseRandomlyGeneratedImages ? params.bitdepth : 16 * ch;
@@ -96,11 +103,24 @@ int main(int argc, char **argv) {
             }
 
         } else {
-            AlphaTree<uint16_t> tree;
-            tStart = get_wall_time();
-            tree.BuildAlphaTree(image.data(), height, width, nch, dMetric, conn, algCode, nthr, tse, fparam1, fparam2,
-                                iparam1);
-            tEnd = get_wall_time();
+
+            uint16_t maxVal = *std::max_element(image.begin(), image.end());
+            if ((int)maxVal > (int)255) {
+                AlphaTree<uint16_t> tree;
+                tStart = get_wall_time();
+                tree.BuildAlphaTree(image.data(), height, width, nch, dMetric, conn, algCode, nthr, tse, fparam1,
+                                    fparam2, iparam1);
+                tEnd = get_wall_time();
+            } else {
+                std::vector<uint8_t> image8(image.size());
+                for (size_t i = 0; i < image.size(); i++)
+                    image8[i] = (uint8_t)image[i];
+                AlphaTree<uint8_t> tree;
+                tStart = get_wall_time();
+                tree.BuildAlphaTree(image8.data(), height, width, nch, dMetric, conn, algCode, nthr, tse, fparam1,
+                                    fparam2, iparam1);
+                tEnd = get_wall_time();
+            }
         }
 
         auto runtime = tEnd - tStart;

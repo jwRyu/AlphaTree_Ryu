@@ -100,8 +100,6 @@ template <class Pixel> class AlphaTree {
     ImgIdx _rootIdx = ROOTIDX;
     double nrmsd = 0.0;
 
-    void EdgeSortingTest(const Pixel *img, int numthreads);
-
     AlphaTree() : _maxSize(0), _curSize(0), _node(0), _parentAry(0) {}
     ~AlphaTree();
     void clear();
