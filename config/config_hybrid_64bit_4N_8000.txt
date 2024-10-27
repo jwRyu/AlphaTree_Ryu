@@ -1,10 +1,10 @@
 ImageFileName=image03.png
 LogFileName=test
 UseRandomlyGeneratedImages=1
-RandomlyGeneratedImageWidth=500
-RandomlyGeneratedImageHeight=500
+RandomlyGeneratedImageWidth=8000
+RandomlyGeneratedImageHeight=8000
 NumberOfChannels=1
-NumberOfThreads=1
+NumberOfThreads=256
 
 # List of algorithms
 #
@@ -37,7 +37,7 @@ AlphaTreeAlgorithm=HybridParallel
 
 BitDepth=64
 UseTreeSizeEstimation=1
-Connectivity=8
+Connectivity=4
 NumberOfTestIterations=5
 ParameterInteger1=3
 ParameterInteger2=2

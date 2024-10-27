@@ -1,8 +1,8 @@
 #!/bin/bash
 #SBATCH --job-name=atree_test   
 #SBATCH --ntasks=1
-#SBATCH --time=00:15:00
-#SBATCH --cpus-per-task=128
+#SBATCH --time=001:0:00
+#SBATCH --cpus-per-task=1
 #SBATCH --mem=100G
 #SBATCH --partition=regular
 

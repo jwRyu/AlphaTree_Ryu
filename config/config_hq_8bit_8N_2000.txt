@@ -1,10 +1,10 @@
 ImageFileName=image03.png
 LogFileName=test
 UseRandomlyGeneratedImages=1
-RandomlyGeneratedImageWidth=500
-RandomlyGeneratedImageHeight=500
+RandomlyGeneratedImageWidth=2000
+RandomlyGeneratedImageHeight=2000
 NumberOfChannels=1
-NumberOfThreads=1
+NumberOfThreads=256
 
 # List of algorithms
 #
@@ -33,9 +33,9 @@ NumberOfThreads=1
 # 16. FloodHierHeapQueueNoCache
 # 17. FloodHeapQueueNaiveNoCache
 # 18. FloodHierHeapQueuePar
-AlphaTreeAlgorithm=HybridParallel
+AlphaTreeAlgorithm=FloodHierQueueParallel
 
-BitDepth=64
+BitDepth=8
 UseTreeSizeEstimation=1
 Connectivity=8
 NumberOfTestIterations=5
