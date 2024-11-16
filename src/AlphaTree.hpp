@@ -58,11 +58,18 @@ using namespace pmt;
 #define CHKRNG(var, a, b) ((var >= a) && (var < b))
 #define QUANTIZE_RANK(rank, binsize) (uint8_t)((rank) / (binsize))
 
+#define RGB_FILTER 0
+
 template <class Pixel> class AlphaNode {
   public:
     ImgIdx area = 0;
     float alpha = std::numeric_limits<Pixel>::infinity();
     float sumPix = 0.0;
+#if RGB_FILTER
+    float rgb[3] = {
+        0.f,
+    };
+#endif
     Pixel minPix = std::numeric_limits<Pixel>::max();
     Pixel maxPix = std::numeric_limits<Pixel>::min();
     ImgIdx parentIdx = ROOTIDX;
@@ -108,6 +115,7 @@ template <class Pixel> class AlphaTree {
                         int connectivity_in, int algorithm, int numthreads, int tse, double fparam1 = 0.0,
                         double fparam2 = 0.0, int iparam1 = 0);
 
+    void AlphaFilter(Pixel *outimg, float alpha);
     void AlphaFilter(double *outimg, double alpha);
     void AreaFilter(double *outimg, double area);
 
@@ -118,6 +126,8 @@ template <class Pixel> class AlphaTree {
     void printVisit(ImgIdx p, double q) const;
     void printIsAvailable(const uint8_t *isAvailable) const;
     static void printBinary(uint8_t num);
+
+    void sortAlphaNodes();
 
   private:
     PixelDissimilarity<Pixel> _pixelDissim;
@@ -166,7 +176,6 @@ template <class Pixel> class AlphaTree {
                       ImgIdx nredges, ImgIdx dimgSize, uint64_t numLevels, const ImgIdx *dhist, const float *dimg,
                       const uint8_t *isAvailable);
 
-    void sortAlphaNodes();
     void markRedundant(ImgIdx imgIdx, ImgIdx eIdx, uint8_t *edgeStatus, ImgIdx *queuedEdges,
                        uint8_t *numQueuedEdges) const;
     void registerEdge(ImgIdx imgIdx, ImgIdx edgeIdx, ImgIdx *queuedEdges, uint8_t *numQueuedEdges) const;

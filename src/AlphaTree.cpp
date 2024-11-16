@@ -47,6 +47,11 @@ template <class Pixel> void AlphaNode<Pixel>::add(const AlphaNode &q) {
     this->sumPix += (float)q.sumPix;
     this->minPix = _min(this->minPix, q.minPix);
     this->maxPix = _max(this->maxPix, q.maxPix);
+#if RGB_FILTER
+    this->rgb[0] += q.rgb[0];
+    this->rgb[1] += q.rgb[1];
+    this->rgb[2] += q.rgb[2];
+#endif
 }
 
 template <class Pixel> void AlphaNode<Pixel>::add(const Pixel &pix_val) {
@@ -147,19 +152,53 @@ void AlphaTree<Pixel>::BuildAlphaTree(const Pixel *img, int height_in, int width
     }
 }
 
+template <class Pixel> void AlphaTree<Pixel>::AlphaFilter(Pixel *outimg, float alpha) {
+    for (int i = 0; i < _curSize; i++)
+        _node[i]._rootIdx = _node[i].parentIdx;
+
+    const ImgIdx imgSize = _height * _width;
+    for (int i = 0; i < imgSize; i++) {
+        if (i % 10000 == 0)
+            printf("index / imgSize = %d %d (%f)%% \n", (int)i, (int)imgSize, 100.0 * (double)i / (double)imgSize);
+        ImgIdx index = _parentAry ? _parentAry[i] : i;
+        ImgIdx startIdx = index;
+        ImgIdx prevIdx = index;
+        while (index != ROOTIDX && index < _curSize && _node[index] < alpha) {
+            prevIdx = index;
+            index = _node[index]._rootIdx;
+        }
+        index = prevIdx;
+        for (ImgIdx idx = startIdx; idx != index;) {
+            ImgIdx nextIdx = _node[idx]._rootIdx;
+            _node[idx]._rootIdx = index;
+            idx = nextIdx;
+        }
+
+        if (index >= 0 && index < _curSize) {
+#if RGB_FILTER
+            const auto pMax = std::numeric_limits<Pixel>::max();
+            const auto pMin = std::numeric_limits<Pixel>::min();
+            outimg[i] = CLIP(_node[index].rgb[0] / (float)_node[index].area, pMin, pMax);
+            outimg[i + imgSize] = CLIP(_node[index].rgb[1] / (float)_node[index].area, pMin, pMax);
+            outimg[i + 2 * imgSize] = CLIP(_node[index].rgb[2] / (float)_node[index].area, pMin, pMax);
+#else
+            outimg[i] = (double)_node[index].area;
+#endif
+        }
+    }
+}
+
 template <class Pixel> void AlphaTree<Pixel>::AlphaFilter(double *outimg, double alpha) {
     ImgIdx i, imgSize;
-    AlphaNode<Pixel> *pNode;
-
     alpha = _node[_rootIdx].alpha * alpha;
 
     imgSize = _height * _width;
-    // val = 1;
     for (i = 0; i < imgSize; i++) {
-        pNode = _parentAry ? &_node[_parentAry[i]] : &_node[i];
-        while (pNode->parentIdx != -1 && pNode->alpha < alpha)
-            pNode = &_node[pNode->parentIdx];
-        outimg[i] = (double)pNode->area;
+        ImgIdx index = _parentAry ? _parentAry[i] : i;
+        while (index != ROOTIDX && index < _curSize && _node[index] < alpha)
+            index = _node[index].parentIdx;
+        if (index >= 0 && index < _curSize)
+            outimg[i] = (double)_node[index].area;
     }
 }
 
@@ -181,7 +220,7 @@ template <class Pixel> void AlphaTree<Pixel>::AreaFilter(double *outimg, double 
 }
 
 template <class Pixel> void AlphaTree<Pixel>::printTree() const {
-    for (int i = 0; i < _maxSize; i++)
+    for (int i = 0; i < _curSize; i++)
         if (_node[i].area > 0)
             _node[i].print(_node);
 }
@@ -2571,12 +2610,22 @@ void AlphaTree<Pixel>::runFloodHHPQ(ImgIdx startingPixel, const Pixel *img, floa
                 currentLevel = queue->front().alpha;
                 const ImgIdx newNodeIdx = _curSize++;
                 _node[newNodeIdx] = AlphaNode<Pixel>(img[p], queue->front().alpha, stackTop);
+#if RGB_FILTER
+                _node[newNodeIdx].rgb[0] = img[p];
+                _node[newNodeIdx].rgb[1] = img[p + imgSize];
+                _node[newNodeIdx].rgb[2] = img[p + 2 * imgSize];
+#endif
                 prevTop = stackTop;
                 stackTop = newNodeIdx;
 
                 if (currentLevel > 0) {
                     const ImgIdx singletonNodeIdx = _curSize++;
                     _node[singletonNodeIdx] = AlphaNode<Pixel>(img[p], 0.0, newNodeIdx);
+#if RGB_FILTER
+                    _node[singletonNodeIdx].rgb[0] = img[p];
+                    _node[singletonNodeIdx].rgb[1] = img[p + imgSize];
+                    _node[singletonNodeIdx].rgb[2] = img[p + 2 * imgSize];
+#endif
                     _parentAry[p] = singletonNodeIdx;
                 } else
                     _parentAry[p] = stackTop;
@@ -2584,10 +2633,21 @@ void AlphaTree<Pixel>::runFloodHHPQ(ImgIdx startingPixel, const Pixel *img, floa
                 if (currentLevel > 0) {
                     const ImgIdx singletonNodeIdx = _curSize++;
                     _node[singletonNodeIdx] = AlphaNode<Pixel>(img[p], 0.0, stackTop);
+#if RGB_FILTER
+                    _node[singletonNodeIdx].rgb[0] = img[p];
+                    _node[singletonNodeIdx].rgb[1] = img[p + imgSize];
+                    _node[singletonNodeIdx].rgb[2] = img[p + 2 * imgSize];
+#endif
                     _node[stackTop].add(_node[singletonNodeIdx]);
                     _parentAry[p] = singletonNodeIdx;
-                } else
+                } else {
                     connectPix2Node(p, img[p], stackTop);
+#if RGB_FILTER
+                    _node[stackTop].rgb[0] += img[p];
+                    _node[stackTop].rgb[1] += img[p + imgSize];
+                    _node[stackTop].rgb[2] += img[p + 2 * imgSize];
+#endif
+                }
                 if (_node[stackTop].area == imgSize)
                     break;
             }
@@ -2625,6 +2685,10 @@ void AlphaTree<Pixel>::runFloodHHPQ(ImgIdx startingPixel, const Pixel *img, floa
 }
 
 template <class Pixel> void AlphaTree<Pixel>::sortAlphaNodes() {
+    if (_parentAry == nullptr) {
+        printf("sortAlphaNodes(): unexpected _parentAry == nullptr\n");
+        return;
+    }
     // Step 1: Capture the original indices
     std::vector<ImgIdx> original_indices(_curSize);
     for (ImgIdx i = 0; i < _curSize; ++i) {
@@ -2664,6 +2728,9 @@ template <class Pixel> void AlphaTree<Pixel>::sortAlphaNodes() {
     // Replace the original array with the sorted one
     for (size_t i = 0; i < sorted_nodes.size(); i++)
         _node[i] = sorted_nodes[i];
+
+    Free(_parentAry);
+    _parentAry = nullptr;
 }
 
 template <class Pixel> void AlphaTree<Pixel>::FloodHierHeapQueueHisteq(const Pixel *img, int listsize, int a) {
@@ -5775,25 +5842,8 @@ template <class Pixel> void AlphaTree<Pixel>::HybridParallel(const Pixel *img, i
 
     computeDifferenceAndSort(indexToRank, rankitem, img, nredges, rankToIndex);
 
-    // uint8_t *isVisited = (uint8_t *)Calloc((size_t)((imgSize)));
-    // printGraph(isVisited, nullptr, img);
-    // Free(isVisited);
-
-    // for (int rank = 0; rank < nredges; rank++) {
-    //     auto index = rankToIndex[rank];
-    //     printf("rank[%d]: ", rank);
-    //     rankitem[index].print();
-    //     printf("\n");
-    // }
-    // std::getchar();
-
     set_subblock_properties(startpidx, blockWidths, blockHeights, blocksize, npartition_x, npartition_y, blksz_x,
                             blksz_y, blksz_xn, blksz_yn);
-
-    // ImgIdx bsum = 0;
-    // for (int i = 0; i < numpartitions; i++)
-    //     bsum += blocksize[i];
-    // printf("bs sum = %d / nredges = %d \n", bsum, nredges);
 
     quantize_ranks_compute_histogram(qrank, indexToRank, img, dhist, blockWidths, blockHeights, startpidx, binsize,
                                      numbins, npartition_x, npartition_y, subtree_max);
@@ -5821,9 +5871,6 @@ template <class Pixel> void AlphaTree<Pixel>::HybridParallel(const Pixel *img, i
     connect_pilotnode(pilottree);
 
     _node[_rootIdx].parentIdx = ROOTIDX;
-
-    // printTree();
-    // std::getchar();
 
     Free(redundant_edge);
     Free(_parentAry);

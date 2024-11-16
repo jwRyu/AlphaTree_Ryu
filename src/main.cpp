@@ -22,13 +22,6 @@ int main(int argc, char **argv) {
 
     auto [image, w, h, ch] = PNGCodec::imread(params.UseRandomlyGeneratedImages ? "RAND" : params.imageFileName);
 
-    {
-        auto img1(image);
-        for (auto &pix : img1)
-            pix = std::min(65535, (int)pix * 10);
-        PNGCodec::imwrite(img1, w, h, ch, "out.png");
-    }
-
     const auto &width = params.UseRandomlyGeneratedImages ? params.randomGenImageWidth : w;
     const auto &height = params.UseRandomlyGeneratedImages ? params.randomGenImageHeight : h;
     const auto &bitdepth = params.UseRandomlyGeneratedImages ? params.bitdepth : 16 * ch;
@@ -110,6 +103,13 @@ int main(int argc, char **argv) {
                 tStart = get_wall_time();
                 tree.BuildAlphaTree(image.data(), height, width, nch, dMetric, conn, algCode, nthr, tse, fparam1,
                                     fparam2, iparam1);
+
+                const bool rgbFilter = false;
+                if (rgbFilter) {
+                    tree.AlphaFilter(image.data(), 170);
+                    PNGCodec::imwrite(image, w, h, ch, "out005.png");
+                }
+
                 tEnd = get_wall_time();
             } else {
                 std::vector<uint8_t> image8(image.size());
