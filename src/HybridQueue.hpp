@@ -260,9 +260,9 @@ template <class Pixel> class HierarQueueCache {
     ~HierarQueueCache();
 
     inline void startPushes() { _emptyTop = 1; }
-    inline int32_t get_minlev() { return list[0].alpha; }
-    inline ImgIdx top() { return list[0].pidx; }
-    inline int32_t top_alpha() { return list[0].alpha; }
+    inline int32_t get_minlev() const { return list[0].alpha; }
+    inline ImgIdx top() const { return list[0].pidx; }
+    inline int32_t top_alpha() const { return list[0].alpha; }
     inline void endPushes() {
         if (_emptyTop)
             pop();

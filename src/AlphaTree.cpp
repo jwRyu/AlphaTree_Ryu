@@ -1978,6 +1978,19 @@ FLOOD_END:
     Free(isAvailable);
 }
 
+template <class Pixel>
+ImgIdx AlphaTree<Pixel>::FloodFindNextStackTop(ImgIdx stackTop, const HierarQueueCache<Pixel> *queue) {
+    ImgIdx nextTop = _node[stackTop].parentIdx;
+    if ((int32_t)queue->top_alpha() < (int32_t)_node[nextTop].alpha) {
+        nextTop = NewAlphaNode1(queue->top_alpha(), _node + stackTop);
+        _node[nextTop].parentIdx = _node[stackTop].parentIdx;
+        _node[nextTop]._rootIdx = ROOTIDX;
+        _node[stackTop].parentIdx = nextTop;
+    } else // go to existing _node
+        _node[nextTop].add(_node + stackTop);
+    return nextTop;
+}
+
 template <class Pixel> void AlphaTree<Pixel>::FloodHierarQueue(const Pixel *img) {
     const ImgIdx imgSize = _width * _height;
     const ImgIdx nredges = _width * (_height - 1) + (_width - 1) * _height +
@@ -2107,15 +2120,7 @@ template <class Pixel> void AlphaTree<Pixel>::FloodHierarQueue(const Pixel *img)
             break;
 
         // go to higher level
-        ImgIdx nextTop = _node[stackTop].parentIdx;
-        if ((int32_t)queue->top_alpha() < (int32_t)_node[nextTop].alpha) {
-            nextTop = NewAlphaNode1(queue->top_alpha(), _node + stackTop);
-            _node[nextTop].parentIdx = _node[stackTop].parentIdx;
-            _node[nextTop]._rootIdx = ROOTIDX;
-            _node[stackTop].parentIdx = nextTop;
-        } else // go to existing _node
-            _node[nextTop].add(_node + stackTop);
-
+        ImgIdx nextTop = FloodFindNextStackTop(stackTop, queue);
         prevTop = stackTop;
         stackTop = nextTop;
         currentLevel = (int32_t)_node[stackTop].alpha;
