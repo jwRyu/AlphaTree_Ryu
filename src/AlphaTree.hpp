@@ -208,7 +208,7 @@ template <class Pixel> class AlphaTree {
     ImgIdx TreeSizeEstimation(ImgIdx *dhist, int64_t numlevels, ImgIdx imgSize, ImgIdx nredges, double m);
     ImgIdx TreeSizeEstimation(ImgIdx *dhist, int64_t numlevels, ImgIdx imgSize, ImgIdx nredges, double m,
                               ImgIdx reserve);
-    void remove_redundant_node(ImgIdx &prev_top, ImgIdx &stack_top);
+    void RemoveRedundantNode(ImgIdx &prev_top, ImgIdx &stack_top);
     int get_bitdepth(uint64_t num);
     ImgIdx initialize_node(const Pixel *img, Pixel *dimg, Pixel maxpixval);
     void initialize_node1(const Pixel *img, RankItem<float> *rankitem, Pixel maxpixval);
@@ -281,7 +281,7 @@ template <class Pixel> class AlphaTree {
                                   int32_t *&rankToIndex);
     ImgIdx NewAlphaNode(ImgIdx &size, ImgIdx &maxsize);
     ImgIdx NewAlphaNode(AlphaNode<Pixel> *tree, ImgIdx &size, ImgIdx &maxsize, Pixel level, AlphaNode<Pixel> *pCopy);
-    void remove_redundant_node(AlphaNode<Pixel> *tree, ImgIdx &size, ImgIdx &prev_top, ImgIdx &stack_top);
+    void RemoveRedundantNode(AlphaNode<Pixel> *tree, ImgIdx &size, ImgIdx &prev_top, ImgIdx &stack_top);
     void connectPix2Node(AlphaNode<Pixel> *tree, ImgIdx pidx, Pixel pix_val, ImgIdx iNode, ImgIdx *pAry);
     ImgIdx find_root1(ImgIdx p, ImgIdx qlevel);
     ImgIdx get_level_root(ImgIdx p, ImgIdx nodeidx);

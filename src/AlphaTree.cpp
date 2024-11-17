@@ -1327,7 +1327,7 @@ ImgIdx AlphaTree<Pixel>::TreeSizeEstimation(ImgIdx *dhist, int64_t numlevels, Im
            reserve;
 }
 
-template <class Pixel> void AlphaTree<Pixel>::remove_redundant_node(ImgIdx &prevTop, ImgIdx &stackTop) {
+template <class Pixel> void AlphaTree<Pixel>::RemoveRedundantNode(ImgIdx &prevTop, ImgIdx &stackTop) {
     if (_node[prevTop].parentIdx == stackTop && _node[prevTop].area == _node[stackTop].area) {
         _node[prevTop].parentIdx = _node[stackTop].parentIdx;
         stackTop = prevTop;
@@ -1472,7 +1472,7 @@ template <class Pixel> void AlphaTree<Pixel>::FloodHierarQueueNoCache(const Pixe
             }
         }
 
-        remove_redundant_node(prevTop, stackTop);
+        RemoveRedundantNode(prevTop, stackTop);
 
         // go to higher level
         iNode = _node[stackTop].parentIdx;
@@ -1634,7 +1634,7 @@ template <class Pixel> void AlphaTree<Pixel>::FloodHeapQueueNoCache(const Pixel 
             }
         }
 
-        remove_redundant_node(prevTop, stackTop);
+        RemoveRedundantNode(prevTop, stackTop);
 
         if (_node[stackTop].area == imgSize) // root _node found...done
             break;
@@ -1791,7 +1791,7 @@ template <class Pixel> void AlphaTree<Pixel>::FloodHeapQueueNaiveNoCache(const P
             }
         }
 
-        remove_redundant_node(prevTop, stackTop);
+        RemoveRedundantNode(prevTop, stackTop);
 
         if (_node[stackTop].area == imgSize) // root _node found...done
             break;
@@ -1949,7 +1949,7 @@ template <class Pixel> void AlphaTree<Pixel>::FloodHeapQueue(const Pixel *img) {
                     goto FLOOD_END;
             }
         }
-        remove_redundant_node(prevTop, stackTop);
+        RemoveRedundantNode(prevTop, stackTop);
 
         if (_node[stackTop].area == imgSize) // root _node found...done
             break;
@@ -2114,7 +2114,7 @@ template <class Pixel> void AlphaTree<Pixel>::FloodHierarQueue(const Pixel *img)
             }
         }
 
-        remove_redundant_node(prevTop, stackTop);
+        RemoveRedundantNode(prevTop, stackTop);
 
         if (_node[stackTop].area == imgSize) // root _node found...done
             break;
@@ -2266,7 +2266,7 @@ template <class Pixel> void AlphaTree<Pixel>::FloodLadderQueue(const Pixel *img,
             }
         }
 
-        remove_redundant_node(prevTop, stackTop);
+        RemoveRedundantNode(prevTop, stackTop);
 
         if (_node[stackTop].area == imgSize) // root _node found...done
             break;
@@ -4321,7 +4321,7 @@ void AlphaTree<Pixel>::floodPartition(const Pixel *img, const Pixel *dimg, ImgId
             }
         }
 
-        // remove_redundant_node(_node, nodeIndex, prevTop, stackTop);
+        // RemoveRedundantNode(_node, nodeIndex, prevTop, stackTop);
         if (_node[prevTop].parentIdx == stackTop && _node[prevTop].area == _node[stackTop].area) {
             _node[prevTop].parentIdx = _node[stackTop].parentIdx;
             stackTop = prevTop;
@@ -6261,7 +6261,7 @@ template <class Pixel> void AlphaTree<Pixel>::HybridParallelOld(const Pixel *img
                 if (outofmemory)
                     break;
 
-                // remove_redundant_node(_node, nidx, prevTop, stackTop);
+                // RemoveRedundantNode(_node, nidx, prevTop, stackTop);
                 if (_node[prevTop].parentIdx == stackTop && _node[prevTop].area == _node[stackTop].area) {
                     // plr[(int)(_node[prevTop].alpha)] = 0;
                     _node[prevTop].parentIdx = _node[stackTop].parentIdx;
@@ -6438,7 +6438,7 @@ ImgIdx AlphaTree<Pixel>::NewAlphaNode(AlphaNode<Pixel> *tree, ImgIdx &size, ImgI
 }
 
 template <class Pixel>
-void AlphaTree<Pixel>::remove_redundant_node(AlphaNode<Pixel> *tree, ImgIdx &size, ImgIdx &prevTop, ImgIdx &stackTop) {
+void AlphaTree<Pixel>::RemoveRedundantNode(AlphaNode<Pixel> *tree, ImgIdx &size, ImgIdx &prevTop, ImgIdx &stackTop) {
     if (tree[prevTop].parentIdx == stackTop && tree[prevTop].area == tree[stackTop].area) {
         tree[prevTop].parentIdx = tree[stackTop].parentIdx;
         stackTop = prevTop;
