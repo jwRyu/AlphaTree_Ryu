@@ -587,16 +587,16 @@ template <class Pixel> Pixel AlphaTree<Pixel>::compute_dimg1(Pixel *dimg, ImgIdx
             for (j = 0; j < _width - 1; j++) {
                 dimg[dimgidx] = (Pixel)(abs((int64_t)img[imgidx + stride_w] - (int64_t)img[imgidx]));
                 maxdiff = _max(maxdiff, dimg[dimgidx]);
-                dhist[dimg[dimgidx++]]++;
+                dhist[(size_t)dimg[dimgidx++]]++;
 
                 dimg[dimgidx] = (Pixel)(abs((int64_t)img[imgidx + 1] - (int64_t)img[imgidx]));
                 maxdiff = _max(maxdiff, dimg[dimgidx]);
-                dhist[dimg[dimgidx++]]++;
+                dhist[(size_t)dimg[dimgidx++]]++;
                 imgidx++;
             }
             dimg[dimgidx] = (Pixel)(abs((int64_t)img[imgidx + stride_w] - (int64_t)img[imgidx]));
             maxdiff = _max(maxdiff, dimg[dimgidx]);
-            dhist[dimg[dimgidx++]]++;
+            dhist[(size_t)dimg[dimgidx++]]++;
             dimgidx++;
             imgidx++;
         }
@@ -604,7 +604,7 @@ template <class Pixel> Pixel AlphaTree<Pixel>::compute_dimg1(Pixel *dimg, ImgIdx
             dimgidx++;
             dimg[dimgidx] = (Pixel)(abs((int64_t)img[imgidx + 1] - (int64_t)img[imgidx]));
             maxdiff = _max(maxdiff, dimg[dimgidx]);
-            dhist[dimg[dimgidx++]]++;
+            dhist[(size_t)dimg[dimgidx++]]++;
             imgidx++;
         }
     } else if (_connectivity == 8) {
@@ -616,24 +616,24 @@ template <class Pixel> Pixel AlphaTree<Pixel>::compute_dimg1(Pixel *dimg, ImgIdx
             for (j = 0; j < _width - 1; j++) {
                 dimg[dimgidx] = (Pixel)(abs((int64_t)img[imgidx + _width] - (int64_t)img[imgidx])); // 0
                 maxdiff = _max(maxdiff, dimg[dimgidx]);
-                dhist[dimg[dimgidx++]]++;
+                dhist[(size_t)dimg[dimgidx++]]++;
                 dimg[dimgidx] = (Pixel)(abs((int64_t)img[imgidx + _width + 1] - (int64_t)img[imgidx])); // 1
                 maxdiff = _max(maxdiff, dimg[dimgidx]);
-                dhist[dimg[dimgidx++]]++;
+                dhist[(size_t)dimg[dimgidx++]]++;
                 dimg[dimgidx] = (Pixel)(abs((int64_t)img[imgidx + 1] - (int64_t)img[imgidx])); // 2
                 maxdiff = _max(maxdiff, dimg[dimgidx]);
-                dhist[dimg[dimgidx++]]++;
+                dhist[(size_t)dimg[dimgidx++]]++;
                 if (i > 0) {
                     dimg[dimgidx] = (Pixel)(abs((int64_t)img[imgidx - _width + 1] - (int64_t)img[imgidx])); // 3
                     maxdiff = _max(maxdiff, dimg[dimgidx]);
-                    dhist[dimg[dimgidx]]++;
+                    dhist[(size_t)dimg[dimgidx]]++;
                 }
                 dimgidx++;
                 imgidx++;
             }
             dimg[dimgidx] = (Pixel)(abs((int64_t)img[imgidx + _width] - (int64_t)img[imgidx])); // 0
             maxdiff = _max(maxdiff, dimg[dimgidx]);
-            dhist[dimg[dimgidx]]++;
+            dhist[(size_t)dimg[dimgidx]]++;
             dimgidx += 4; // skip 1,2,3
             imgidx++;
         }
@@ -643,10 +643,10 @@ template <class Pixel> Pixel AlphaTree<Pixel>::compute_dimg1(Pixel *dimg, ImgIdx
         for (j = 0; j < _width - 1; j++) {
             dimg[dimgidx] = (Pixel)(abs((int64_t)img[imgidx + 1] - (int64_t)img[imgidx])); // 2
             maxdiff = _max(maxdiff, dimg[dimgidx]);
-            dhist[dimg[dimgidx++]]++;
+            dhist[(size_t)dimg[dimgidx++]]++;
             dimg[dimgidx] = (Pixel)(abs((int64_t)img[imgidx - _width + 1] - (int64_t)img[imgidx])); // 3
             maxdiff = _max(maxdiff, dimg[dimgidx]);
-            dhist[dimg[dimgidx]]++;
+            dhist[(size_t)dimg[dimgidx]]++;
             dimgidx += 3;
             imgidx++;
         }
@@ -2036,10 +2036,10 @@ template <class Pixel> void AlphaTree<Pixel>::FloodHierarQueue(const Pixel *img)
     const ImgIdx dimgSize = (_connectivity >> 1) * _width * _height;
     const uint64_t pixelMax = (uint64_t)std::numeric_limits<Pixel>::max();
 
-    if (pixelMax > 1e4) {
-        printf("AlphaTree<Pixel>::FloodHierarQueue(): Dynamic range too high (pixelMax = %ld)\n", pixelMax);
-        return;
-    }
+    // if (pixelMax > 1e6) {
+    //     printf("AlphaTree<Pixel>::FloodHierarQueue(): Dynamic range too high (pixelMax = %ld)\n", pixelMax);
+    //     return;
+    // }
 
     ImgIdx *dhist = (ImgIdx *)Calloc((size_t)(pixelMax + 1) * sizeof(ImgIdx));
     Pixel *dimg = (Pixel *)Malloc((size_t)dimgSize * sizeof(Pixel));
