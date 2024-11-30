@@ -1,9 +1,10 @@
-ImageFileName=/home/jiwoo/2024/TIP/dataset/001_S2A_MSIL2A_20241006T104921_N0511_R051_T31UES_20241006T151849-ql.png
+ImageFileName=/home/jiwoo/2024/TIP/dataset/005_small.png
+# ImageFileName=/home/jiwoo/2024/TIP/dataset/001_S2A_MSIL2A_20241006T104921_N0511_R051_T31UES_20241006T151849-ql.png
 LogFileName=test
-UseRandomlyGeneratedImages=1
-RandomlyGeneratedImageWidth=3000
-RandomlyGeneratedImageHeight=3000
-NumberOfChannels=1
+UseRandomlyGeneratedImages=0
+RandomlyGeneratedImageWidth=1000
+RandomlyGeneratedImageHeight=1000
+NumberOfChannels=3
 NumberOfThreads=1
 
 # List of algorithms
@@ -35,10 +36,10 @@ NumberOfThreads=1
 # 18. FloodHierHeapQueuePar
 AlphaTreeAlgorithm=FloodHierHeapQueue
 
-BitDepth=64
+BitDepth=8
 UseTreeSizeEstimation=1
 Connectivity=4
-NumberOfTestIterations=5
+NumberOfTestIterations=1
 ParameterInteger1=3
 ParameterInteger2=2
 ParameterInteger3=3

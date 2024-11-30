@@ -1991,6 +1991,44 @@ ImgIdx AlphaTree<Pixel>::FloodFindNextStackTop(ImgIdx stackTop, const HierarQueu
     return nextTop;
 }
 
+template <class Pixel>
+void AlphaTree<Pixel>::PushNeighbors(ImgIdx p, uint8_t isAv, const Pixel *dimg, HierarQueueCache<Pixel> *queue,
+                                     const uint8_t *isVisited) const {
+    // For 4-connectivity
+    if (_connectivity == 4) {
+        const ImgIdx q = p << 1;
+        if (is_available(isAv, 0) && !isVisited[p + _width])
+            queue->push(p + _width, dimg[q]); // Down
+        if (is_available(isAv, 1) && !isVisited[p + 1])
+            queue->push(p + 1, dimg[q + 1]); // Right
+        if (is_available(isAv, 2) && !isVisited[p - 1])
+            queue->push(p - 1, dimg[q - 1]); // Left
+        if (is_available(isAv, 3) && !isVisited[p - _width])
+            queue->push(p - _width, dimg[q - (_width << 1)]); // Up
+    }
+    // For 8-connectivity
+    else if (_connectivity == 8) {
+        ImgIdx width4 = _width << 2;
+        const ImgIdx q = p << 2;
+        if (is_available(isAv, 0) && !isVisited[p + _width])
+            queue->push(p + _width, dimg[q]); // Down
+        if (is_available(isAv, 1) && !isVisited[p + _width + 1])
+            queue->push(p + _width + 1, dimg[q + 1]); // Down-right
+        if (is_available(isAv, 2) && !isVisited[p + 1])
+            queue->push(p + 1, dimg[q + 2]); // Right
+        if (is_available(isAv, 3) && !isVisited[p - _width + 1])
+            queue->push(p - _width + 1, dimg[q + 3]); // Up-right
+        if (is_available(isAv, 4) && !isVisited[p - _width])
+            queue->push(p - _width, dimg[q - width4]); // Up
+        if (is_available(isAv, 5) && !isVisited[p - _width - 1])
+            queue->push(p - _width - 1, dimg[q - width4 - 3]); // Up-left
+        if (is_available(isAv, 6) && !isVisited[p - 1])
+            queue->push(p - 1, dimg[q - 2]); // Left
+        if (is_available(isAv, 7) && !isVisited[p + _width - 1])
+            queue->push(p + _width - 1, dimg[q + width4 - 1]); // Down-left
+    }
+}
+
 template <class Pixel> void AlphaTree<Pixel>::FloodHierarQueue(const Pixel *img) {
     const ImgIdx imgSize = _width * _height;
     const ImgIdx nredges = _width * (_height - 1) + (_width - 1) * _height +
@@ -2047,37 +2085,7 @@ template <class Pixel> void AlphaTree<Pixel>::FloodHierarQueue(const Pixel *img)
 
             queue->startPushes();
             isVisited[p] = 1;
-            const uint8_t isAv = isAvailable[p];
-            if (_connectivity == 4) {
-                const ImgIdx q = p << 1;
-                if (is_available(isAv, 0) && !isVisited[p + _width])
-                    queue->push(p + _width, dimg[q]);
-                if (is_available(isAv, 1) && !isVisited[p + 1])
-                    queue->push(p + 1, dimg[q + 1]);
-                if (is_available(isAv, 2) && !isVisited[p - 1])
-                    queue->push(p - 1, dimg[q - 1]);
-                if (is_available(isAv, 3) && !isVisited[p - _width])
-                    queue->push(p - _width, dimg[q - (_width << 1)]);
-            } else if (_connectivity == 8) {
-                ImgIdx width4 = _width << 2;
-                const ImgIdx q = p << 2;
-                if (is_available(isAv, 0) && !isVisited[p + _width])
-                    queue->push(p + _width, dimg[q]);
-                if (is_available(isAv, 1) && !isVisited[p + _width + 1])
-                    queue->push(p + _width + 1, dimg[q + 1]);
-                if (is_available(isAv, 2) && !isVisited[p + 1])
-                    queue->push(p + 1, dimg[q + 2]);
-                if (is_available(isAv, 3) && !isVisited[p - _width + 1])
-                    queue->push(p - _width + 1, dimg[q + 3]);
-                if (is_available(isAv, 4) && !isVisited[p - _width])
-                    queue->push(p - _width, dimg[q - width4]);
-                if (is_available(isAv, 5) && !isVisited[p - _width - 1])
-                    queue->push(p - _width - 1, dimg[q - width4 - 3]);
-                if (is_available(isAv, 6) && !isVisited[p - 1])
-                    queue->push(p - 1, dimg[q - 2]);
-                if (is_available(isAv, 7) && !isVisited[p + _width - 1])
-                    queue->push(p + _width - 1, dimg[q + width4 - 1]);
-            }
+            PushNeighbors(p, isAvailable[p], dimg, queue, isVisited);
 
             const bool isZeroCC = (currentLevel == 0);
             queue->endPushes();
