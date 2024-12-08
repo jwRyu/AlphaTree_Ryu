@@ -3,7 +3,7 @@ LogFileName=test
 UseRandomlyGeneratedImages=0
 RandomlyGeneratedImageWidth=0
 RandomlyGeneratedImageHeight=0
-NumberOfChannels=3
+NumberOfChannels=1
 NumberOfThreads=1
 
 # List of algorithms
@@ -33,12 +33,12 @@ NumberOfThreads=1
 # 16. FloodHierHeapQueueNoCache
 # 17. FloodHeapQueueNaiveNoCache
 # 18. FloodHierHeapQueuePar
-AlphaTreeAlgorithm=FloodHierHeapQueue
+AlphaTreeAlgorithm=FloodHierQueue
 
-BitDepth=7
+BitDepth=18
 UseTreeSizeEstimation=1
-Connectivity=8
-NumberOfTestIterations=1
+Connectivity=4
+NumberOfTestIterations=5
 ParameterInteger1=3
 ParameterInteger2=2
 ParameterInteger3=3

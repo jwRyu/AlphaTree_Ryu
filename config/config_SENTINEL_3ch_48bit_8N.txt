@@ -4,7 +4,7 @@ UseRandomlyGeneratedImages=0
 RandomlyGeneratedImageWidth=0
 RandomlyGeneratedImageHeight=0
 NumberOfChannels=3
-NumberOfThreads=1
+NumberOfThreads=256
 
 # List of algorithms
 #
@@ -33,12 +33,12 @@ NumberOfThreads=1
 # 16. FloodHierHeapQueueNoCache
 # 17. FloodHeapQueueNaiveNoCache
 # 18. FloodHierHeapQueuePar
-AlphaTreeAlgorithm=FloodHierHeapQueue
+AlphaTreeAlgorithm=HybridParallel
 
-BitDepth=7
+BitDepth=16
 UseTreeSizeEstimation=1
 Connectivity=8
-NumberOfTestIterations=1
+NumberOfTestIterations=5
 ParameterInteger1=3
 ParameterInteger2=2
 ParameterInteger3=3

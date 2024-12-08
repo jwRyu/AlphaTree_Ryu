@@ -35,10 +35,10 @@ NumberOfThreads=1
 # 18. FloodHierHeapQueuePar
 AlphaTreeAlgorithm=FloodHierHeapQueue
 
-BitDepth=7
+BitDepth=11
 UseTreeSizeEstimation=1
 Connectivity=8
-NumberOfTestIterations=1
+NumberOfTestIterations=5
 ParameterInteger1=3
 ParameterInteger2=2
 ParameterInteger3=3
