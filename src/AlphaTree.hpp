@@ -148,6 +148,7 @@ template <class Pixel> class AlphaTree {
     void FloodTrie(const Pixel *img);
     void FloodHierQueueParallel(const Pixel *img, int numthreads);
     void HybridParallel(const Pixel *img, int numthreads);
+    void HybridParallelNoRedundantSkip(const Pixel *img, int numthreads);
     void HybridParallelOld(const Pixel *img, int numthreads);
 
     void PushNeighbors(ImgIdx p, uint8_t isAv, const Pixel *dimg, HierarQueueCache<Pixel> *queue,

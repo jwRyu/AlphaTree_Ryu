@@ -4755,7 +4755,7 @@ void AlphaTree<Pixel>::unionfind_refine_qlevel(int64_t qlevel, int64_t binsize, 
 
             const ImgIdx nodeaddr = r + imgSize;
 
-            if (redundant_edge[rankitem[ridx].dimgidx])
+            if (redundant_edge && redundant_edge[rankitem[ridx].dimgidx])
                 continue;
 
             const ImgIdx x0 = find_root(pilottree, pRank->get_pidx0(_connectivity), qlevel);
@@ -5596,12 +5596,8 @@ void AlphaTree<Pixel>::HybridPilotFlooding(const Pixel *img, ImgIdx *startpidx, 
         prevTop = stackTop; /*to find redundant _node*/
         bool isFirstPixel = true;
 
-        while (_node[stackTop].area < blockArea) // flooding
-        {
-            while ((int64_t)queue->min_level <= (int64_t)currentLevel) // flood all levels below currentLevel
-            {
-                // printf("QTOP = %d\n", queue->top());
-
+        while (_node[stackTop].area < blockArea) {                       // flooding
+            while ((int64_t)queue->min_level <= (int64_t)currentLevel) { // flood all levels below currentLevel
                 const auto [p, isAv] = getFloodingContext(isFirstPixel, queue->pop(), isAvailable);
 
                 if (isVisited[p]) {
@@ -5609,12 +5605,6 @@ void AlphaTree<Pixel>::HybridPilotFlooding(const Pixel *img, ImgIdx *startpidx, 
                     continue;
                 }
                 isVisited[p] = 1;
-
-                // printf("[block %d] Visiting %d at %f\n", blk, p, (double)queue->min_level);
-                // printf("isAv = ");
-                // printBinary(isAv);
-                // printf("\n");
-                // printGraph(isVisited, nullptr, img);
 
                 uint8_t connected_neighbor = 0;
                 const ImgIdx wstride = _width << shamt;
@@ -5653,79 +5643,54 @@ void AlphaTree<Pixel>::HybridPilotFlooding(const Pixel *img, ImgIdx *startpidx, 
                     }
                 } else { // 8N
                     const ImgIdx q = p << shamt;
-                    // printf("shamt = %d, p = %d, q = %d\n", shamt, p, q);
 
                     if (is_available(isAv, 0)) {
                         if (isVisited[p + _width])
                             connected_neighbor |= 0b00000001;
-                        else {
+                        else
                             queue->push(packEdgeIncidence(q, 1), qrank[q]);
-                            // printf("0Pushing p = %d, q = %d (packed = %d)\n", p + _width, q, packEdgeIncidence(q,
-                            // 1));
-                        }
                     }
                     if (is_available(isAv, 1)) {
                         if (isVisited[p + _width + 1])
                             connected_neighbor |= 0b00000010;
-                        else {
+                        else
                             queue->push(packEdgeIncidence(q + 1, 1), qrank[q + 1]);
-                            // printf("1Pushing p = %d, q = %d (packed = %d)\n", p + _width + 1, q + 1,
-                            //        packEdgeIncidence(q + 1, 1));
-                        }
                     }
                     if (is_available(isAv, 2)) {
                         if (isVisited[p + 1])
                             connected_neighbor |= 0b00000100;
-                        else {
+                        else
                             queue->push(packEdgeIncidence(q + 2, 1), qrank[q + 2]);
-                            // printf("2Pushing p = %d, q = %d (packed = %d)\n", p + 1, q + 2,
-                            //        packEdgeIncidence(q + 2, 1));
-                        }
                     }
                     if (is_available(isAv, 3)) {
                         if (isVisited[p - _width + 1])
                             connected_neighbor |= 0b00001000;
-                        else {
+                        else
                             queue->push(packEdgeIncidence(q + 3, 1), qrank[q + 3]);
-                            // printf("3Pushing p = %d, q = %d (packed = %d)\n", p - _width + 1, q + 3,
-                            //        packEdgeIncidence(q + 3, 1));
-                        }
                     }
                     if (is_available(isAv, 4)) {
                         if (isVisited[p - _width])
                             connected_neighbor |= 0b00010000;
-                        else {
+                        else
                             queue->push(packEdgeIncidence(q - wstride, 0), qrank[q - wstride]);
-                            // printf("4Pushing p = %d, q = %d (packed = %d)\n", p - _width, q - wstride,
-                            //        packEdgeIncidence(q - wstride, 0));
-                        }
                     }
                     if (is_available(isAv, 5)) {
                         if (isVisited[p - _width - 1])
                             connected_neighbor |= 0b00100000;
-                        else {
+                        else
                             queue->push(packEdgeIncidence(q - wstride - 3, 0), qrank[q - wstride - 3]);
-                            // printf("5Pushing p = %d, q = %d (packed = %d)\n", p - _width - 1, q - wstride - 3,
-                            //        packEdgeIncidence(q - wstride - 3, 0));
-                        }
                     }
                     if (is_available(isAv, 6)) {
                         if (isVisited[p - 1])
                             connected_neighbor |= 0b01000000;
-                        else {
+                        else
                             queue->push(packEdgeIncidence(q - 2, 0), qrank[q - 2]);
-                            // printf("6Pushing p = %d, q = %d (packed = %d)\n", p - 1, q - 2,
-                            //        packEdgeIncidence(q - 2, 0));
-                        }
                     }
                     if (is_available(isAv, 7)) {
                         if (isVisited[p + _width - 1])
                             connected_neighbor |= 0b10000000;
-                        else {
+                        else
                             queue->push(packEdgeIncidence(q + wstride - 1, 0), qrank[q + wstride - 1]);
-                            // printf("7Pushing p = %d, q = %d (packed = %d)\n", p + _width - 1, q + wstride - 1,
-                            //        packEdgeIncidence(q + wstride - 1, 0));
-                        }
                     }
                 }
 
@@ -5758,7 +5723,7 @@ void AlphaTree<Pixel>::HybridPilotFlooding(const Pixel *img, ImgIdx *startpidx, 
                     }
                 }
 
-                if (connected_neighbor)
+                if (redundant_edge && connected_neighbor)
                     markRedundantEdges(redundant_edge, p, connected_neighbor, qrank);
             }
 
@@ -5810,6 +5775,91 @@ void AlphaTree<Pixel>::HybridPilotFlooding(const Pixel *img, ImgIdx *startpidx, 
 }
 
 // hp
+template <class Pixel> void AlphaTree<Pixel>::HybridParallelNoRedundantSkip(const Pixel *img, int numthreads) {
+    clear();
+    const ImgIdx imgSize = _width * _height;
+    const ImgIdx nredges = _width * (_height - 1) + (_width - 1) * _height +
+                           ((_connectivity == 8) ? ((_width - 1) * (_height - 1) * 2) : 0);
+    const ImgIdx dimgSize = (_connectivity >> 1) * _width * _height;
+    RankItem<float> *rankitem = (RankItem<float> *)Malloc(nredges * sizeof(RankItem<float>));
+
+    ImgIdx *indexToRank = (ImgIdx *)Calloc((size_t)dimgSize * sizeof(ImgIdx));
+    uint8_t *qrank = (uint8_t *)Malloc((size_t)dimgSize);
+    _parentAry = (ImgIdx *)Calloc((size_t)imgSize * sizeof(ImgIdx));
+
+    // ImgIdx numpartitionsTarget = _min(imgSize / 2, _min(256, numthreads * 3));
+    ImgIdx numpartitionsTarget = _min(imgSize / 2, _min(256, numthreads)); // TODO: study numtrhead constandst
+    const auto [npartition_x, npartition_y] = computePartitionSize(numpartitionsTarget);
+
+    ImgIdx binsize = nredges / numpartitionsTarget;
+    const ImgIdx numbins = (nredges + binsize - 1) / binsize;
+    const ImgIdx blksz_x = _width / npartition_x;
+    const ImgIdx blksz_y = _height / npartition_y;
+    const ImgIdx blksz_xn = blksz_x + (_width % npartition_x);
+    const ImgIdx blksz_yn = blksz_y + (_height % npartition_y);
+    const ImgIdx numpartitions = (int64_t)npartition_x * (int64_t)npartition_y;
+
+    ImgIdx *startpidx = (ImgIdx *)Malloc(numpartitions * sizeof(ImgIdx));
+    ImgIdx *blocksize = (ImgIdx *)Malloc(numpartitions * sizeof(ImgIdx));
+    ImgIdx *subtree_cur = (ImgIdx *)Malloc(numpartitions * sizeof(ImgIdx));
+    ImgIdx *subtree_max = (ImgIdx *)Malloc(numpartitions * sizeof(ImgIdx));
+    ImgIdx *blockWidths = (ImgIdx *)Malloc(numpartitions * sizeof(ImgIdx));
+    ImgIdx *blockHeights = (ImgIdx *)Malloc(numpartitions * sizeof(ImgIdx));
+    ImgIdx *dhist = (ImgIdx *)Calloc((size_t)numbins * (size_t)numpartitions * sizeof(ImgIdx));
+
+    omp_set_num_threads(_min(numthreads, omp_get_num_procs()));
+
+    int32_t *rankToIndex = (int32_t *)Calloc(nredges * sizeof(int32_t));
+
+    computeDifferenceAndSort(indexToRank, rankitem, img, nredges, rankToIndex);
+
+    set_subblock_properties(startpidx, blockWidths, blockHeights, blocksize, npartition_x, npartition_y, blksz_x,
+                            blksz_y, blksz_xn, blksz_yn);
+
+    quantize_ranks_compute_histogram(qrank, indexToRank, img, dhist, blockWidths, blockHeights, startpidx, binsize,
+                                     numbins, npartition_x, npartition_y, subtree_max);
+
+    int8_t *redundant_edge = nullptr; // (int8_t *)Calloc(dimgSize * sizeof(int8_t));
+
+    HybridPilotFlooding(img, startpidx, redundant_edge, numpartitions, blocksize, blockWidths, blockHeights, numbins,
+                        subtree_cur, subtree_max, dhist, qrank, blksz_x, blksz_y, npartition_x, npartition_y);
+
+    _maxSize = imgSize + nredges;
+    AlphaNode<Pixel> *pilottree = _node;
+    _node = (AlphaNode<Pixel> *)Malloc((size_t)(_maxSize + 1) * sizeof(AlphaNode<Pixel>));
+    _nodeIn = _node + imgSize;
+
+    Pixel maxpixval = std::numeric_limits<Pixel>::max();
+    initialize_node_par1(img, rankitem, maxpixval, rankToIndex);
+
+#pragma omp parallel for schedule(dynamic, 1)
+    for (ImgIdx qlevel = 0; qlevel < numbins; qlevel++) {
+        if (qlevel > (int64_t)pilottree[_rootIdx].alpha)
+            continue;
+        unionfind_refine_qlevel(qlevel, binsize, nredges, pilottree, rankitem, redundant_edge, rankToIndex);
+    }
+
+    connect_pilotnode(pilottree);
+
+    _node[_rootIdx].parentIdx = ROOTIDX;
+
+    Free(_parentAry);
+    _parentAry = nullptr;
+    if (rankToIndex)
+        Free(rankToIndex);
+    Free(blockWidths);
+    Free(blockHeights);
+    Free(dhist);
+    Free(startpidx);
+    Free(blocksize);
+    Free(subtree_cur);
+    Free(subtree_max);
+    Free(pilottree);
+    Free(indexToRank);
+    Free(rankitem);
+    Free(qrank);
+}
+
 template <class Pixel> void AlphaTree<Pixel>::HybridParallel(const Pixel *img, int numthreads) {
     clear();
     const ImgIdx imgSize = _width * _height;

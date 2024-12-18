@@ -1,10 +1,10 @@
 # ImageFileName=001_bw.png
-# ImageFileName=/home/jiwoo/2024/TIP/dataset/001_S2A_MSIL2A_20241006T104921_N0511_R051_T31UES_20241006T151849-ql.png
 # ImageFileName=/home/jiwoo/2024/TIP/dataset
+ImageFileName=/home/jiwoo/2024/TIP/dataset/001_S2A_MSIL2A_20241006T104921_N0511_R051_T31UES_20241006T151849-ql.png
 LogFileName=test
-UseRandomlyGeneratedImages=1
-RandomlyGeneratedImageWidth=10000
-RandomlyGeneratedImageHeight=10000
+UseRandomlyGeneratedImages=0
+RandomlyGeneratedImageWidth=4000
+RandomlyGeneratedImageHeight=4000
 NumberOfChannels=1
 NumberOfThreads=1
 
@@ -35,9 +35,9 @@ NumberOfThreads=1
 # 16. FloodHierHeapQueueNoCache
 # 17. FloodHeapQueueNaiveNoCache
 # 18. FloodHierHeapQueuePar
-AlphaTreeAlgorithm=FloodHierQueue
+AlphaTreeAlgorithm=FloodHierHeapQueue
 
-BitDepth=18
+BitDepth=32
 UseTreeSizeEstimation=1
 Connectivity=4
 NumberOfTestIterations=1

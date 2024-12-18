@@ -5,14 +5,6 @@
 #include <AlphaTreeConfig.hpp>
 #include <RandGenImage.hpp>
 
-const std::string rgbFileNames[5] = {"001_S2A_MSIL2A_20241006T104921_N0511_R051_T31UES_20241006T151849-ql.png",
-                                     "002_S2A_MSIL2A_20241006T104921_N0511_R051_T31UFS_20241006T151849.png",
-                                     "003_S2B_MSIL2A_20241011T104859_N0511_R051_T31UFT_20241011T133022.png",
-                                     "004_S2B_MSIL2A_20241011T104859_N0511_R051_T31UFU_20241011T133022.png",
-                                     "005_S2B_MSIL2A_20241011T104859_N0511_R051_T31UFV_20241011T133022.png"};
-
-const std::string bwFileNames[5] = {"001_bw.png", "002_bw.png", "003_bw.png", "004_bw.png", "005_bw.png"};
-
 // args: Filename, nchannels, numthreads, testimgsize, algorithmcode, bitdepth, tseflag
 int main(int argc, char **argv) {
     // srand(time(NULL));
@@ -28,148 +20,138 @@ int main(int argc, char **argv) {
 
     AlphaTreeConfig::AlphaTreeParameters params = config.value();
 
-    const size_t numFiles = params.UseRandomlyGeneratedImages ? 1 : 5;
+    const std::string filePath = params.imageFileName;
 
-    for (size_t fileIndex = 0; fileIndex < numFiles; fileIndex++) {
+    auto [image, w, h, ch] = PNGCodec::imread(params.UseRandomlyGeneratedImages ? "RAND" : filePath);
 
-        const std::string filePath =
-            (params.imageFileName + "/" + (params.nchannels == 1 ? bwFileNames[fileIndex] : rgbFileNames[fileIndex]));
-        std::cout << filePath << std::endl;
+    const bool reduceImageBitdepth = true;
 
-        auto [image, w, h, ch] = PNGCodec::imread(params.UseRandomlyGeneratedImages ? "RAND" : filePath);
+    const auto &width = params.UseRandomlyGeneratedImages ? params.randomGenImageWidth : w;
+    const auto &height = params.UseRandomlyGeneratedImages ? params.randomGenImageHeight : h;
+    const auto &bitdepth = params.UseRandomlyGeneratedImages ? params.bitdepth : 16 * ch;
+    const auto &nch = params.UseRandomlyGeneratedImages ? params.nchannels : ch;
+    const auto &dMetric = params.dissimilarityMetric;
+    const auto &conn = params.connectivity;
+    const auto &algCode = params.alphaTreeAlgorithmCode;
+    const auto &nthr = params.numthreads;
+    const auto &nitr = params.numitr;
+    const auto &tse = params.tse;
+    const auto &iparam1 = params.iparam1;
+    const auto &fparam1 = params.fparam1;
+    const auto &fparam2 = params.fparam2;
 
-        const bool reduceImageBitdepth = true;
+    if (!params.UseRandomlyGeneratedImages)
+        printf("Image file name: %s\n", params.imageFileName.c_str());
+    printf("=======================================================================\n");
+    printf("========== imgsize = %d x %d (%d bits, %d ch, %dN) ================\n", (int)height, (int)width,
+           (int)bitdepth, (int)nch, params.connectivity);
+    printf("=======================================================================\n");
+    printf("-----------------------------------------------------------------------------------\n");
+    printf("%d Running %s (%d threads)\n", (int)algCode, alphatreeConfig.getAlphaTreeAlgorithmName(algCode).c_str(),
+           (int)nthr);
+    printf("-----------------------------------------------------------------------------------\n");
+    std::vector<double> runtimes;
 
-        const auto &width = params.UseRandomlyGeneratedImages ? params.randomGenImageWidth : w;
-        const auto &height = params.UseRandomlyGeneratedImages ? params.randomGenImageHeight : h;
-        const auto &bitdepth = params.UseRandomlyGeneratedImages ? params.bitdepth : 16 * ch;
-        const auto &nch = params.UseRandomlyGeneratedImages ? params.nchannels : ch;
-        const auto &dMetric = params.dissimilarityMetric;
-        const auto &conn = params.connectivity;
-        const auto &algCode = params.alphaTreeAlgorithmCode;
-        const auto &nthr = params.numthreads;
-        const auto &nitr = params.numitr;
-        const auto &tse = params.tse;
-        const auto &iparam1 = params.iparam1;
-        // const auto &iparam2 = params.iparam2;
-        // const auto &iparam3 = params.iparam3;
-        const auto &fparam1 = params.fparam1;
-        const auto &fparam2 = params.fparam2;
-        // const auto &fparam3 = params.fparam3;
-
-        if (!params.UseRandomlyGeneratedImages)
-            printf("Image file name: %s\n", params.imageFileName.c_str());
-        printf("=======================================================================\n");
-        printf("========== imgsize = %d x %d (%d bits, %d ch, %dN) ================\n", (int)height, (int)width,
-               (int)bitdepth, (int)nch, params.connectivity);
-        printf("=======================================================================\n");
-        printf("-----------------------------------------------------------------------------------\n");
-        printf("%d Running %s (%d threads)\n", (int)algCode, alphatreeConfig.getAlphaTreeAlgorithmName(algCode).c_str(),
-               (int)nthr);
-        printf("-----------------------------------------------------------------------------------\n");
-        std::vector<double> runtimes;
-
-        for (int itr = 0; itr < nitr; itr++) {
-            double tStart = 0, tEnd = INFINITY;
-            if (params.UseRandomlyGeneratedImages == true) {
-                if (bitdepth > 32 && bitdepth <= 64) {
-                    uint64_t *image = (uint64_t *)Malloc(width * height * sizeof(uint64_t));
-                    RandGenImage::randomize64(image, width, height, bitdepth);
-                    AlphaTree<uint64_t> tree;
-                    tStart = get_wall_time();
-                    tree.BuildAlphaTree(image, height, width, nch, dMetric, conn, algCode, nthr, tse, fparam1, fparam2,
-                                        iparam1);
-                    tEnd = get_wall_time();
-                    Free(image);
-                } else if (bitdepth > 16) {
-                    uint32_t *image = (uint32_t *)Malloc(width * height * sizeof(uint32_t));
-                    RandGenImage::randomize32(image, width, height, bitdepth);
-                    AlphaTree<uint32_t> tree;
-                    tStart = get_wall_time();
-                    tree.BuildAlphaTree(image, height, width, nch, dMetric, conn, algCode, nthr, tse, fparam1, fparam2,
-                                        iparam1);
-                    tEnd = get_wall_time();
-                    Free(image);
-                } else if (bitdepth > 8) {
-                    uint16_t *image = (uint16_t *)Malloc(width * height * nch * sizeof(uint16_t));
-                    RandGenImage::randomize16(image, width, height, bitdepth, nch);
-                    AlphaTree<uint16_t> tree;
-                    tStart = get_wall_time();
-                    tree.BuildAlphaTree(image, height, width, nch, dMetric, conn, algCode, nthr, tse, fparam1, fparam2,
-                                        iparam1);
-                    tEnd = get_wall_time();
-                    Free(image);
-                } else if (bitdepth > 0) {
-                    uint8_t *image = (uint8_t *)Malloc(width * height * nch * sizeof(uint8_t));
-                    RandGenImage::randomize8(image, width, height, bitdepth, nch);
-                    AlphaTree<uint8_t> tree;
-                    tStart = get_wall_time();
-                    tree.BuildAlphaTree(image, height, width, nch, dMetric, conn, algCode, nthr, tse, fparam1, fparam2,
-                                        iparam1);
-                    tEnd = get_wall_time();
-                    Free(image);
-                } else {
-                    std::cerr << "Invalid bit-depth. " << std::endl;
-                    return -1;
-                }
-
+    for (int itr = 0; itr < nitr; itr++) {
+        double tStart = 0, tEnd = INFINITY;
+        if (params.UseRandomlyGeneratedImages == true) {
+            if (bitdepth > 32 && bitdepth <= 64) {
+                uint64_t *image = (uint64_t *)Malloc(width * height * sizeof(uint64_t));
+                RandGenImage::randomize64(image, width, height, bitdepth);
+                AlphaTree<uint64_t> tree;
+                tStart = get_wall_time();
+                tree.BuildAlphaTree(image, height, width, nch, dMetric, conn, algCode, nthr, tse, fparam1, fparam2,
+                                    iparam1);
+                tEnd = get_wall_time();
+                Free(image);
+            } else if (bitdepth > 16) {
+                uint32_t *image = (uint32_t *)Malloc(width * height * sizeof(uint32_t));
+                RandGenImage::randomize32(image, width, height, bitdepth);
+                AlphaTree<uint32_t> tree;
+                tStart = get_wall_time();
+                tree.BuildAlphaTree(image, height, width, nch, dMetric, conn, algCode, nthr, tse, fparam1, fparam2,
+                                    iparam1);
+                tEnd = get_wall_time();
+                Free(image);
+            } else if (bitdepth > 8) {
+                uint16_t *image = (uint16_t *)Malloc(width * height * nch * sizeof(uint16_t));
+                RandGenImage::randomize16(image, width, height, bitdepth, nch);
+                AlphaTree<uint16_t> tree;
+                tStart = get_wall_time();
+                tree.BuildAlphaTree(image, height, width, nch, dMetric, conn, algCode, nthr, tse, fparam1, fparam2,
+                                    iparam1);
+                tEnd = get_wall_time();
+                Free(image);
+            } else if (bitdepth > 0) {
+                uint8_t *image = (uint8_t *)Malloc(width * height * nch * sizeof(uint8_t));
+                RandGenImage::randomize8(image, width, height, bitdepth, nch);
+                AlphaTree<uint8_t> tree;
+                tStart = get_wall_time();
+                tree.BuildAlphaTree(image, height, width, nch, dMetric, conn, algCode, nthr, tse, fparam1, fparam2,
+                                    iparam1);
+                tEnd = get_wall_time();
+                Free(image);
             } else {
-
-                if (reduceImageBitdepth) {
-                    const size_t shamt = 16 - params.bitdepth;
-                    uint16_t pMin = 65535;
-                    uint16_t pMax = 0;
-
-                    for (auto &pixel : image) {
-                        pixel = pixel >> shamt;
-                        pMax = std::max(pMax, pixel);
-                        pMin = std::min(pMin, pixel);
-                    }
-
-                    printf("reduceImageBitdepth - BitDepth = params.bitdepth = %d / DR = %d - %d\n",
-                           (int)params.bitdepth, (int)pMin, (int)pMax);
-                }
-
-                uint16_t maxVal = *std::max_element(image.begin(), image.end());
-                if ((int)maxVal > (int)255) {
-                    AlphaTree<uint16_t> tree;
-                    tStart = get_wall_time();
-                    tree.BuildAlphaTree(image.data(), height, width, nch, dMetric, conn, algCode, nthr, tse, fparam1,
-                                        fparam2, iparam1);
-
-                    const bool rgbFilter = false;
-                    if (rgbFilter) {
-                        tree.AlphaFilter(image.data(), 170);
-                        PNGCodec::imwrite(image, w, h, ch, "out005.png");
-                    }
-
-                    tEnd = get_wall_time();
-                } else {
-                    std::vector<uint8_t> image8(image.size());
-                    for (size_t i = 0; i < image.size(); i++)
-                        image8[i] = (uint8_t)image[i];
-                    AlphaTree<uint8_t> tree;
-                    tStart = get_wall_time();
-                    tree.BuildAlphaTree(image8.data(), height, width, nch, dMetric, conn, algCode, nthr, tse, fparam1,
-                                        fparam2, iparam1);
-                    tEnd = get_wall_time();
-                }
+                std::cerr << "Invalid bit-depth. " << std::endl;
+                return -1;
             }
 
-            auto runtime = tEnd - tStart;
-            printf("-------------------Run %d/%d: %.3f------------------\n", (int)itr + 1, nitr, runtime);
-            runtimes.push_back(runtime);
+        } else {
+
+            if (reduceImageBitdepth) {
+                const size_t shamt = 16 - params.bitdepth;
+                uint16_t pMin = 65535;
+                uint16_t pMax = 0;
+
+                for (auto &pixel : image) {
+                    pixel = pixel >> shamt;
+                    pMax = std::max(pMax, pixel);
+                    pMin = std::min(pMin, pixel);
+                }
+
+                printf("reduceImageBitdepth - BitDepth = params.bitdepth = %d / DR = %d - %d\n", (int)params.bitdepth,
+                       (int)pMin, (int)pMax);
+            }
+
+            uint16_t maxVal = *std::max_element(image.begin(), image.end());
+            if ((int)maxVal > (int)255) {
+                AlphaTree<uint16_t> tree;
+                tStart = get_wall_time();
+                tree.BuildAlphaTree(image.data(), height, width, nch, dMetric, conn, algCode, nthr, tse, fparam1,
+                                    fparam2, iparam1);
+
+                const bool rgbFilter = false;
+                if (rgbFilter) {
+                    tree.AlphaFilter(image.data(), 170);
+                    PNGCodec::imwrite(image, w, h, ch, "out005.png");
+                }
+
+                tEnd = get_wall_time();
+            } else {
+                std::vector<uint8_t> image8(image.size());
+                for (size_t i = 0; i < image.size(); i++)
+                    image8[i] = (uint8_t)image[i];
+                AlphaTree<uint8_t> tree;
+                tStart = get_wall_time();
+                tree.BuildAlphaTree(image8.data(), height, width, nch, dMetric, conn, algCode, nthr, tse, fparam1,
+                                    fparam2, iparam1);
+                tEnd = get_wall_time();
+            }
         }
 
-        if (runtimes.empty() == false) {
-            double minRuntime = *std::min_element(runtimes.begin(), runtimes.end());
-            double imgsize = (double)(width * height);
+        auto runtime = tEnd - tStart;
+        printf("-------------------Run %d/%d: %.3f------------------\n", (int)itr + 1, nitr, runtime);
+        runtimes.push_back(runtime);
+    }
 
-            printf("================== Summary ==================\n");
-            printf("Processing speed: %.3fMpix/s / Memory use %.3fB/pix \n", (imgsize / minRuntime) * 1e-6,
-                   (double)max_memuse / imgsize);
-            printf("=============================================\n");
-        }
+    if (runtimes.empty() == false) {
+        double minRuntime = *std::min_element(runtimes.begin(), runtimes.end());
+        double imgsize = (double)(width * height);
+
+        printf("================== Summary ==================\n");
+        printf("Processing speed: %.3fMpix/s / Memory use %.3fB/pix \n", (imgsize / minRuntime) * 1e-6,
+               (double)max_memuse / imgsize);
+        printf("=============================================\n");
     }
 
     return 0;
